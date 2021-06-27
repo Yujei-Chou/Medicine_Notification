@@ -263,12 +263,10 @@ app.get('/get_contact_data', (req, res)=>{
   var supervisee_result
   connection.query(`SELECT * FROM Supervise, user_Info WHERE superviseeId = '${req.query.user}' AND userId = supervisorId`, (err, all_supervisor) => {
     result1_length = all_supervisor.length
-    console.log(all_supervisor)
     supervisor_result=all_supervisor
   })
   connection.query(`SELECT * FROM Supervise, user_Info WHERE supervisorId = '${req.query.user}' AND userId = superviseeId`, (err, all_supervisee) => {
     result2_length = all_supervisee.length
-    console.log(all_supervisee)
     supervisee_result=all_supervisee
     res.send(
       {'supervisor_info': {'sql_data':supervisor_result, 'length':result1_length}, 'supervisee_info': {'sql_data':supervisee_result, 'length':result2_length}}
@@ -278,41 +276,29 @@ app.get('/get_contact_data', (req, res)=>{
 })
 
 app.get('/delete_contact', (req,res)=>{
-
-  connection.query(`DELETE FROM Supervise WHERE superviseeId = '${req.query.supervisee}' AND supervisorId = '${req.query.supervisor}'`, (err, result) => {
-    if(err) console.log('fail to delete:', err)
-  })
-
   var result1_length
   var result2_length
   var supervisor_result
+  var supervisee_result
 
-  setTimeout(function(){
+  connection.query(`DELETE FROM Supervise WHERE superviseeId = '${req.query.supervisee}' AND supervisorId = '${req.query.supervisor}'`, (err, result) => {
+    if(err) console.log('fail to delete:', err)
     connection.query(`SELECT * FROM Supervise, user_Info WHERE superviseeId = '${req.query.user}' AND userId = supervisorId`, (err, all_supervisor) => {
       result1_length = all_supervisor.length
-      console.log(all_supervisor)
       supervisor_result=all_supervisor
     })
     connection.query(`SELECT * FROM Supervise, user_Info WHERE supervisorId = '${req.query.user}' AND userId = superviseeId`, (err, all_supervisee) => {
       result2_length = all_supervisee.length
-      console.log(all_supervisee)
       supervisee_result=all_supervisee
-    })
-  }, 350)
-  setTimeout(function(){
-    res.send(
-      {'supervisor_info': {'sql_data':supervisor_result, 'length':result1_length}, 'supervisee_info': {'sql_data':supervisee_result, 'length':result2_length}}
-    )
-  }, 750)
+      res.send(
+        {'supervisor_info': {'sql_data':supervisor_result, 'length':result1_length}, 'supervisee_info': {'sql_data':supervisee_result, 'length':result2_length}}
+      )      
+    })    
+  })
 })
 
 
 app.get('/agree', (req, res)=>{
-  console.log('乖孫美美被認可了')
-  console.log(`supervisor: ${req.query.supervisor_Id}`)
-  console.log(`supervisee: ${req.query.supervisee_Id}`)
-  console.log(req.query.state)
-  console.log(`time=${req.query.time}`)
   date = Date.now()
   connection.query(`SELECT * FROM Supervise WHERE superviseeId = '${req.query.supervisee_Id}' AND supervisorId = '${req.query.supervisor_Id}'`, (err, result) => {
     if(result.length==0){
@@ -481,28 +467,51 @@ function handleEvent(event) {
       console.log('err')
     })
     
-    let greeting = {
+    let greeting ={
       "type": "template",
-      "altText": "歡迎加入乖孫美美",
+      "altText": "歡迎您加入乖孫美美聊天機器人",
       "template": {
-        "type": "buttons",
-        "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/drugbox_template.jpg",
-        "imageAspectRatio": "rectangle",
-        "imageSize": "cover",
-        "title": "建立我的藥盒",
-        "text": "請您先提供目前服用的藥物有哪些吧！",
-        "actions": [
-          {
-            "type": "uri",
-            "label": "新增藥物",
-            "uri" : "https://liff.line.me/1655949102-WX1rbAJw"
-          },
-          {
-            "type":"uri",
-            "label":"新增提醒",
-            "uri":"https://liff.line.me/1655949102-QOy7mkzW"
-          }
-        ]
+          "type": "carousel",
+          "columns": [
+              {
+                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/drugbox_template.jpg",
+                "title": "建立藥盒",
+                "text": "請您先提供目前服用的藥物有哪些吧！",
+                "actions": [
+                  {
+                    "type": "uri",
+                    "label": "新增藥物",
+                    "uri" : "https://liff.line.me/1655949102-WX1rbAJw"
+                  }
+                ]
+              },
+              {
+                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/notify_template.png",
+                "title": "新增藥物提醒",
+                "text": "您可以新增藥物提醒，或是您可以再為藥盒新增藥物！",
+                "actions": [                
+                  {
+                    "type":"uri",
+                    "label":"新增提醒",
+                    "uri":"https://liff.line.me/1655949102-QOy7mkzW"
+                  }
+                ]
+              },
+              {
+                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/contact_template.png",
+                "title": "建立我的聯絡人",
+                "text": "您可以為他人設定藥物提醒，或是讓他人為您設定藥物提醒。",
+                "actions": [
+                  {
+                    "type":"uri",
+                    "label":"建立我的聯絡人",
+                    "uri":"https://liff.line.me/1655949102-b0jGAZ6r"
+                  }
+                ]
+              }              
+          ],
+          "imageAspectRatio": "rectangle",
+          "imageSize": "cover"
       }
     }
 
