@@ -31,7 +31,7 @@ body{
     text-align: center;
     width: 67.2vw;
 }
-#btnShare_beSupervisee{
+#btnShare_supervisee, #btnShare_supervisor{
     position: fixed;
     bottom: 1.25em;
     left:15vw;
@@ -39,16 +39,7 @@ body{
     border-radius: 5vw   !important;
     width: 70vw;
     font-size:4.5vw;
-}
-
-#btnShare_beSupervisor{
-    position: fixed;
-    bottom: 1.25em;
-    left:15vw;
-    height:12vw;
-    border-radius: 5vw   !important;
-    width: 70vw;
-    font-size:4.5vw;
+    display: none;
 }
 
 .blank{

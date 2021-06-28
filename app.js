@@ -242,90 +242,51 @@ app.get('/check-isFriend', (req, res) => {
   connection.query(`SELECT * FROM user_Info WHERE userId='${req.query.userId}'`,(err, result) => {
     if(err) console.log('fail to select:', err)
     if(result.length > 0){
-      res.send(true)
+      res.send({'IsFriend':true, 'accountId':line_config.accountId})
     }else{
-      res.send(false)
+      res.send({'IsFriend':false, 'accountId':line_config.accountId})
     }
   })    
 })
 
+app.get('/get-contact-data', (req, res)=>{
+  if(req.query.searchKind == 'supervisor'){
+    connection.query(`SELECT * FROM Supervise, user_Info WHERE superviseeId = '${req.query.userId}' AND userId = supervisorId`, (err, supervisor) => {
+      res.send(supervisor)
+    })
+  }
 
-app.get('/sending_error_msg', (req, res)=>{
-  client.pushMessage(req.query.userid, [{type:'text', text: `${req.query.txt}`}])
-  res.send('111')
-})
-
-app.get('/get_contact_data', (req, res)=>{
-  console.log('get_contact_data')
-  var result1_length
-  var result2_length
-  var supervisor_result
-  var supervisee_result
-  connection.query(`SELECT * FROM Supervise, user_Info WHERE superviseeId = '${req.query.user}' AND userId = supervisorId`, (err, all_supervisor) => {
-    result1_length = all_supervisor.length
-    supervisor_result=all_supervisor
-  })
-  connection.query(`SELECT * FROM Supervise, user_Info WHERE supervisorId = '${req.query.user}' AND userId = superviseeId`, (err, all_supervisee) => {
-    result2_length = all_supervisee.length
-    supervisee_result=all_supervisee
-    res.send(
-      {'supervisor_info': {'sql_data':supervisor_result, 'length':result1_length}, 'supervisee_info': {'sql_data':supervisee_result, 'length':result2_length}}
-    )
-  })
+  if(req.query.searchKind == 'supervisee'){
+    connection.query(`SELECT * FROM Supervise, user_Info WHERE supervisorId = '${req.query.userId}' AND userId = superviseeId`, (err, supervisee) => {
+      res.send(supervisee)
+    })
+  }  
 
 })
 
-app.get('/delete_contact', (req,res)=>{
-  var result1_length
-  var result2_length
-  var supervisor_result
-  var supervisee_result
-
+app.get('/delete-contact', (req,res)=>{
   connection.query(`DELETE FROM Supervise WHERE superviseeId = '${req.query.supervisee}' AND supervisorId = '${req.query.supervisor}'`, (err, result) => {
     if(err) console.log('fail to delete:', err)
-    connection.query(`SELECT * FROM Supervise, user_Info WHERE superviseeId = '${req.query.user}' AND userId = supervisorId`, (err, all_supervisor) => {
-      result1_length = all_supervisor.length
-      supervisor_result=all_supervisor
-    })
-    connection.query(`SELECT * FROM Supervise, user_Info WHERE supervisorId = '${req.query.user}' AND userId = superviseeId`, (err, all_supervisee) => {
-      result2_length = all_supervisee.length
-      supervisee_result=all_supervisee
-      res.send(
-        {'supervisor_info': {'sql_data':supervisor_result, 'length':result1_length}, 'supervisee_info': {'sql_data':supervisee_result, 'length':result2_length}}
-      )      
-    })    
+    res.send()
   })
 })
 
 
-app.get('/agree', (req, res)=>{
-  date = Date.now()
+app.get('/open-invite-link', (req, res)=>{
   connection.query(`SELECT * FROM Supervise WHERE superviseeId = '${req.query.supervisee_Id}' AND supervisorId = '${req.query.supervisor_Id}'`, (err, result) => {
     if(result.length==0){
-        if(date-req.query.time<=3*86400*1000){
-          if(req.query.state=='agree')connection.query(`INSERT INTO Supervise(superviseeId, supervisorId) VALUES ('${req.query.supervisee_Id}','${req.query.supervisor_Id}')`, (err, result) => {
-            if(err) console.log('fail to insert:', err)
-            else{
-              connection.query(`SELECT * FROM user_Info WHERE userId = '${req.query.supervisee_Id}'`, (err, supervisee_result) => {
-                for(var j=0; j<supervisee_result.length; j=j+1){
-                  client.pushMessage(req.query.supervisor_Id, [{type:"text", text:`您成為${supervisee_result[j]['userName']}的監督人！`}])
-                }
-              })
-              connection.query(`SELECT * FROM user_Info WHERE userId = '${req.query.supervisor_Id}'`, (err, supervisor_result) => {
-                for(var j=0; j<supervisor_result.length; j=j+1){
-                  client.pushMessage(req.query.supervisee_Id, [{type:"text", text:`${supervisor_result[j]['userName']}成為您的監督人！`}])
-                }
-              })
-            }
-          })
-          res.send('no')
-        }
-        else{
-          res.send('yes_and_deleted')
-        }
-    }
-    else{
-      res.send('yes')
+      connection.query(`INSERT INTO Supervise(superviseeId, supervisorId) VALUES ('${req.query.supervisee_Id}','${req.query.supervisor_Id}')`, (err, result) => {
+        if(err) console.log('fail to insert:', err)
+        connection.query(`SELECT * FROM user_Info WHERE userId = '${req.query.supervisee_Id}'`, (err, supervisee_result) => {
+          client.pushMessage(req.query.supervisor_Id, [{type:"text", text:`您成為${supervisee_result[0]['userName']}的監督人！`}])
+        })
+        connection.query(`SELECT * FROM user_Info WHERE userId = '${req.query.supervisor_Id}'`, (err, supervisor_result) => {
+          client.pushMessage(req.query.supervisee_Id, [{type:"text", text:`${supervisor_result[0]['userName']}成為您的監督人！`}])
+        })
+        res.send('matching')
+      })
+    }else{
+      res.send('already match')
     }
   })
 })
@@ -394,7 +355,6 @@ function run() {
                         INNER JOIN user_Info ON user_Notify_temp.userId = user_Info.userId
                         WHERE user_Notify_temp.userId = '${result[i]['userId']}' AND time = 3`
                         , (err, result) => {
-        console.log('測試 :', result)
 
         if (result.length != 0) {
           for (var j = 0; j < result.length; j++) {

@@ -53,3 +53,18 @@ function switchToMineNotify(){
     $('#supervisee').empty()    
 }
 
+function switchToSuperviseeList(){
+    Nav_contactor_animate()
+    $('#list_of_supervisee').css('display', 'initial')
+    $('#list_of_supervisor').css('display', 'none')
+    $('#btnShare_supervisee').css('display', 'initial')
+    $('#btnShare_supervisor').css('display', 'none')     
+}
+
+function switchToSupervisorList(){  
+    Nav_mine_animate()  
+    $('#list_of_supervisor').css('display', 'initial')
+    $('#list_of_supervisee').css('display', 'none')
+    $('#btnShare_supervisor').css('display', 'initial')
+    $('#btnShare_supervisee').css('display', 'none')                     
+}

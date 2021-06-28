@@ -226,7 +226,23 @@
       liff.getProfile()
       .then(profile =>{
         $(document).ready(function(){
-          Load_pillBox(profile.userId, 'myPillbox')
+          $.ajax({
+            url:'/check-isFriend',
+            data:{
+              userId: profile.userId
+            },
+            success:function(data){
+              if(!data.IsFriend){
+                liff.openWindow({
+                  url: `https://liff.line.me/1645278921-kWRPP32q?accountId=${data.accountId}`
+                })
+              }
+              else{ 
+                Load_pillBox(profile.userId, 'myPillbox')
+              }
+
+            }
+          })          
 
           $('body').on('click', 'nav button:nth-child(1)', function(){
             if($('#createbtn').length){
@@ -261,7 +277,6 @@
             $('#confirmBtn').attr('value', $(this).attr('value'))
             warning()
           })
-
 
           $('body').on('click', '.editbtn', function(){
             $.ajax({
@@ -331,7 +346,6 @@
 	                                   <div>${$(this).attr('superviseeName')}</div>`)
             Load_pillBox($(this).val(), 'superviseePillbox')
           })
-
 
           $('body').on('change', '#pic', function(){
             readURL(this)
