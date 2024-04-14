@@ -1,5 +1,5 @@
 const fs = require('fs')
-const https = require('https')
+const http = require('http')
 const express = require('express')
 const app = express()
 const line = require('@line/bot-sdk')
@@ -15,11 +15,6 @@ const lineConfig = {
   channelSecret: line_config.secret
 }
 
-const sslOptions = {
-  key: fs.readFileSync(line_config.key_path),
-  ca: fs.readFileSync(line_config.ca_path),
-  cert: fs.readFileSync(line_config.cert_path)
-}
 
 //connect to mysql
 const connection = mysql.createConnection(db_config.mysql)
@@ -40,19 +35,22 @@ app.set('view engine', 'hbs')
 
 //route
 app.get('/add_medicine', (req, res) => {
-  res.render('add_medicine')
+  res.setHeader('ngrok-skip-browser-warning', 'true')
+  res.render('add_medicine', {'addMed_liffID': line_config.addMed_liffID })
 })
 
 app.get('/med_notify', (req, res) => {
-  res.render('med_notify')
+  res.render('med_notify', {'addNtfy_liffID': line_config.addNtfy_liffID})
 })
 
 app.get('/contact', (req, res) => {
-  res.render('contact')
+  res.render('contact', {'addCont_liffID': line_config.addCont_liffID, 
+                         'addContIv_liffID': line_config.addContIv_liffID,
+                         'serverURL': line_config.serverURL})
 })
 
 app.get('/contact_invite', (req, res) => {
-  res.render('contact_invite')
+  res.render('contact_invite', {'addContIv_liffID': line_config.addContIv_liffID})
 })
 
 app.post('/webhook', line.middleware(lineConfig), (req, res) => {
@@ -86,7 +84,7 @@ app.use(bodyParser.json({limit: '50mb', extended: true}))
 
 app.post('/add-med', (req, res) => {
   if(req.body.queryCond == 'insert'){
-    connection.query(`SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'test' AND TABLE_NAME = 'user_Med'`, (err, result) =>{
+    connection.query(`SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '${db_config.mysql.database}' AND TABLE_NAME = 'user_Med'`, (err, result) =>{
       let picName = `${result[0]['AUTO_INCREMENT']}.png`
       fs.writeFile(`./dist/img/medPic/${picName}`, req.body.medPicture.split('base64,')[1], 'base64', function(err) {
         console.log(err)
@@ -386,7 +384,7 @@ function run() {
 
         result.forEach(element => {
           carousel_msg.template.columns.push({
-            "imageUrl": `https://luffy.ee.ncku.edu.tw:7128/${element.medPicture}`,
+            "imageUrl": `${line_config.serverURL}/${element.medPicture}`,
             "action": {
               "type": "message",
               "label": `${element.medName}，${element.onceAmount}顆`,
@@ -434,38 +432,38 @@ function handleEvent(event) {
           "type": "carousel",
           "columns": [
               {
-                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/drugbox_template.jpg",
+                "thumbnailImageUrl": `${line_config.serverURL}/img/drugbox_template.jpg`,
                 "title": "建立藥盒",
                 "text": "請您先提供目前服用的藥物有哪些吧！",
                 "actions": [
                   {
                     "type": "uri",
                     "label": "新增藥物",
-                    "uri" : "https://liff.line.me/1655949102-WX1rbAJw"
+                    "uri" : `https://liff.line.me/${line_config.addMed_liffID}`
                   }
                 ]
               },
               {
-                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/notify_template.png",
+                "thumbnailImageUrl": `${line_config.serverURL}/img/notify_template.png`,
                 "title": "新增藥物提醒",
                 "text": "您可以新增藥物提醒，或是您可以再為藥盒新增藥物！",
                 "actions": [                
                   {
-                    "type":"uri",
-                    "label":"新增提醒",
-                    "uri":"https://liff.line.me/1655949102-QOy7mkzW"
+                    "type": "uri",
+                    "label": "新增提醒",
+                    "uri": `https://liff.line.me/${line_config.addNtfy_liffID}`
                   }
                 ]
               },
               {
-                "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/contact_template.png",
+                "thumbnailImageUrl": `${line_config.serverURL}/img/contact_template.png`,
                 "title": "建立我的聯絡人",
                 "text": "您可以為他人設定藥物提醒，或是讓他人為您設定藥物提醒。",
                 "actions": [
                   {
-                    "type":"uri",
-                    "label":"建立我的聯絡人",
-                    "uri":"https://liff.line.me/1655949102-b0jGAZ6r"
+                    "type": "uri",
+                    "label": "建立我的聯絡人",
+                    "uri": `https://liff.line.me/${line_config.addCont_liffID}`
                   }
                 ]
               }              
@@ -535,7 +533,7 @@ function handleEvent(event) {
 
 
 
-const server = https.createServer(sslOptions, app)
+const server = http.createServer(app)
 
 server.listen(line_config.port, () => {
 	console.log(`listen on port ${line_config.port}`)

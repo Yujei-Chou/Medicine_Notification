@@ -209,7 +209,7 @@
 
 
     liff.init({
-      liffId:'1655949102-QOy7mkzW'
+      liffId: '{{addNtfy_liffID}}'
     })
     .then(() => {
       liff.getProfile()
@@ -280,6 +280,7 @@
           })
 
           $('body').on('click', '#backbtn', function(){
+            $('#warning_sentence').css('color','black');
             $('.checkbtn').each(function(index) {
                 if(!this.checked){
                   $('#medChosen_'+this.value).css('display','initial')

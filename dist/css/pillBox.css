@@ -76,6 +76,7 @@ body{
   outline:none;
 }
 .delete{
+  color: black;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -89,6 +90,7 @@ body{
   align-self:center;  
 }
 .edit{
+  color: black;
   display:flex;		
   align-items:center;
   justify-content:center;

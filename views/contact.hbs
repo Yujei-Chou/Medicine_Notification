@@ -102,7 +102,7 @@
 
 
     liff.init({
-      liffId:'1655949102-b0jGAZ6r'//contact
+      liffId: '{{addCont_liffID}}'
     })
     .then(() => {
       liff.getProfile()
@@ -177,14 +177,14 @@
                   "altText": "乖孫美美邀請你成為我的藥物提醒監督人",
                   "template": {
                     "type": "buttons",
-                    "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/invite.png",
+                    "thumbnailImageUrl": "{{serverURL}}/img/invite.png",
                     "title": "邀請你成為我的藥物提醒監督人",
-                    "text": `現在立即點及確認，你可以為我設定藥物提醒。`,
+                    "text": `現在立即點擊確認，你可以為我設定藥物提醒。`,
                     "actions": [
                       {
                         "type": "uri",
                         "label": "確認成為監督人",
-                        "uri": `https://liff.line.me/1655949102-Bp9qg6ke?time=${time}&supervisee_id=${profile.userId}`
+                        "uri": `https://liff.line.me/{{addContIv_liffID}}?time=${time}&supervisee_id=${profile.userId}`
                       }
                     ]
                   }
@@ -207,14 +207,14 @@
                   "altText": "乖孫美美邀請你成為我的藥物提醒被監督人",
                   "template": {
                     "type": "buttons",
-                    "thumbnailImageUrl": "https://luffy.ee.ncku.edu.tw:7128/img/invite.png",
+                    "thumbnailImageUrl": "{{serverURL}}/img/invite.png",
                     "title": "邀請你成為我的藥物提醒被監督人",
-                    "text": `現在立即點及確認，我可以為你設定藥物提醒`,
+                    "text": `現在立即點擊確認，我可以為你設定藥物提醒`,
                     "actions": [
                       {
                         "type": "uri",
                         "label": "確認成為被監督人",
-                        "uri": `https://liff.line.me/1655949102-Bp9qg6ke?time=${time}&supervisor_id=${profile.userId}`
+                        "uri": `https://liff.line.me/{{addContIv_liffID}}?time=${time}&supervisor_id=${profile.userId}`
                       }
                     ]
                   }
